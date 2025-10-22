@@ -1,323 +1,202 @@
 # Label Studio on Azure Container Apps
 
-This project deploys [Label Studio](https://labelstud.io/) to Azure Container Apps using the Azure Developer CLI (azd).This repository includes a simple Python FastAPI app with a single route that returns JSON.
-
-You can use this project as a starting point for your own APIs.
+This project deploys [Label Studio](https://labelstud.io/) to Azure Container Apps using the Azure Developer CLI (azd).
 
 ## Features
 
-The repository is designed for use with [Docker containers](https://www.docker.com/), both for local development and deployment, and includes infrastructure files for deployment to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview). 🐳
+The repository is designed for use with [Docker containers](https://www.docker.com/) and includes infrastructure files for deployment to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview). 🐳
 
 - **Label Studio**: Latest version deployed from official Docker Hub image
+- **Persistent Storage**: Azure Blob Storage
+- **Container Apps**: Serverless container hosting with automatic scaling
+- **Monitoring**: Application Insights and Log Analytics integration
 
-- **Persistent Storage**: Azure File Share mounted for data persistenceThe code istested with [pytest](https://docs.pytest.org/en/7.2.x/),
+## Prerequisites
 
-- **Container Apps**: Serverless container hosting with automatic scalinglinted with [ruff](https://github.com/charliermarsh/ruff), and formatted with [black](https://black.readthedocs.io/en/stable/).
+1. Install Azure Developer CLI:
+   ```bash
+   # macOS/Linux
+   curl -fsSL https://aka.ms/install-azd.sh | bash
+   
+   # Windows
+   powershell -ex AllSigned -c "Invoke-RestMethod 'https://aka.ms/install-azd.ps1' | Invoke-Expression"
+   ```
 
-- **Monitoring**: Application Insights and Log Analytics integrationCode quality issues are all checked with both [pre-commit](https://pre-commit.com/) and Github actions.
+2. Have an Azure subscription
 
+## Deploy in 3 Steps
 
-
-## Prerequisites## Opening the project
-
-
-
-- [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)This project has [Dev Container support](https://code.visualstudio.com/docs/devcontainers/containers), so it will be be setup automatically if you open it in Github Codespaces or in local VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
-
-- [Docker](https://docs.docker.com/get-docker/)
-
-- Azure subscriptionIf you're not using one of those options for opening the project, then you'll need to:
-
-
-
-## Getting Started1. Create a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments) and activate it.
-
-
-
-### 1. Login to Azure2. Install the requirements:
-
-
-
-```bash    ```shell
-
-azd auth login    python3 -m pip install -r requirements-dev.txt
-
-```    ```
-
-
-
-### 2. Deploy to Azure3. Install the pre-commit hooks:
-
-
-
-```bash    ```shell
-
-azd up    pre-commit install
-
-```    ```
-
-
-
-This command will:## Local development
-
-1. Prompt you for an environment name (e.g., "label-studio-prod")
-
-2. Ask you to select an Azure subscription and location1. Run the local server:
-
-3. Provision all Azure resources (Resource Group, Container Apps Environment, Storage Account, etc.)
-
-4. Build and push the Label Studio Docker image to Azure Container Registry    ```shell
-
-5. Deploy the container to Azure Container Apps    fastapi dev src/api/main.py
-
-6. Configure persistent storage for Label Studio data    ```
-
-
-
-The deployment typically takes 5-10 minutes.2. Click 'http://127.0.0.1:8000' in the terminal, which should open a new tab in the browser.
-
-
-
-### 3. Access Label Studio3. Try the API at '/generate_name' and try passing in a parameter at the end of the URL, like '/generate_name?starts_with=N'.
-
-
-
-After deployment completes, azd will output the URL for your Label Studio instance:### Local development with Docker
-
-
-
-```You can also run this app with Docker, thanks to the `Dockerfile`.
-
-LABEL_STUDIO_URL: https://your-app.region.azurecontainerapps.io
-
-```You need to either have Docker Desktop installed or have this open in Github Codespaces for these commands to work. ⚠️ If you're on an Apple M1/M2, you won't be able to run `docker` commands inside a Dev Container; either use Codespaces or do not open the Dev Container.
-
-
-
-Visit this URL in your browser to start using Label Studio.1. Build the image:
-
-
-
-## Architecture    ```shell
-
-    docker build --tag fastapi-app ./src
-
-- **Azure Container Apps**: Hosts the Label Studio container    ```
-
-- **Azure Container Registry**: Stores the container image
-
-- **Azure Storage Account**: Provides persistent file storage via Azure Files2. Run the image:
-
-- **Azure Monitor**: Log Analytics and Application Insights for monitoring
-
-    ```shell
-
-## Data Persistence    docker run --publish 3100:3100 fastapi-app
-
-    ```
-
-Label Studio data is persisted in an Azure File Share mounted at `/label-studio/data` in the container. This includes:
-
-- Project configurations### Deployment
-
-- Annotations
-
-- Uploaded media filesThis repo is set up for deployment on Azure Container Apps using the configuration files in the `infra` folder.
-
-- Database files
-
-This diagram shows the architecture of the deployment:
-
-## Customization
-
-![Diagram of app architecture: Azure Container Apps environment, Azure Container App, Azure Container Registry, Container, and Key Vault](readme_diagram.png)
-
-### Change Label Studio Version
-
-Steps for deployment:
-
-Edit `Dockerfile.azd` and change the version tag:
-
-1. Sign up for a [free Azure account](https://azure.microsoft.com/free/) and create an Azure Subscription.
-
-```dockerfile2. Install the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd). (If you open this repository in Codespaces or with the VS Code Dev Containers extension, that part will be done for you.)
-
-FROM heartexlabs/label-studio:1.9.03. Login to Azure:
-
-```
-
-    ```shell
-
-Then run:    azd auth login
-
-    ```
-
+### 1. Login to Azure
 ```bash
-
-azd deploy4. Provision and deploy all the resources:
-
+azd auth login
 ```
 
-    ```shell
-
-### Adjust Resources    azd up
-
-    ```
-
-Edit `infra/api.bicep` to change CPU, memory, or replica settings:
-
-    It will prompt you to provide an `azd` environment name (like "fastapi-app"), select a subscription from your Azure account, and select a location (like "eastus"). Then it will provision the resources in your account and deploy the latest code. If you get an error with deployment, changing the location can help, as there may be availability constraints for some of the resources.
-
-```bicep
-
-containerCpuCoreCount: '1.0'5. When `azd` has finished deploying, you'll see an endpoint URI in the command output. Visit that URI, and you should see the API output! 🎉
-
-containerMemory: '2.0Gi'6. When you've made any changes to the app code, you can just run:
-
-containerMinReplicas: 1
-
-containerMaxReplicas: 1    ```shell
-
-```    azd deploy
-
-    ```
-
-### Configure Environment Variables
-
-### Costs
-
-Add environment variables in `infra/api.bicep` in the `app` module parameters:
-
-Pricing varies per region and usage, so it isn't possible to predict exact costs for your usage.
-
-```bicepThe majority of the Azure resources used in this infrastructure are on usage-based pricing tiers.
-
-module app 'core/host/container-app-upsert.bicep' = {However, Azure Container Registry has a fixed cost per registry per day.
-
-  name: '${serviceName}-container-app-module'
-
-  params: {You can try the [Azure pricing calculator](https://azure.com/e/9f8185b239d240b398e201078d0c4e7a) for the resources:
-
-    // ... existing params ...
-
-    env: [- Azure Container App: Consumption tier with 0.5 CPU, 1GiB memory/storage. Pricing is based on resource allocation, and each month allows for a certain amount of free usage. [Pricing](https://azure.microsoft.com/pricing/details/container-apps/)
-
-      {- Azure Container Registry: Basic tier. [Pricing](https://azure.microsoft.com/pricing/details/container-registry/)
-
-        name: 'LABEL_STUDIO_USERNAME'- Log analytics: Pay-as-you-go tier. Costs based on data ingested. [Pricing](https://azure.microsoft.com/pricing/details/monitor/)
-
-        value: 'admin@localhost'
-
-      }⚠️ To avoid unnecessary costs, remember to take down your app if it's no longer in use,
-
-      {either by deleting the resource group in the Portal or running `azd down`.
-
-        name: 'LABEL_STUDIO_PASSWORD'
-
-        value: 'changeme'
-
-      }## Getting help
-
-    ]
-
-  }If you're working with this project and running into issues, please post in **Discussions**.
-
-}
+### 2. Deploy Everything
+```bash
+azd up
 ```
 
-## Monitoring
+You'll be prompted for:
+- **Environment name**: A name for this deployment (e.g., `labelstudio-prod`)
+- **Subscription**: Select your Azure subscription
+- **Location**: Choose a region (e.g., `eastus`, `westus2`)
 
-View logs and metrics:
+### 3. Access Your Application
 
+After deployment completes (5-10 minutes), you'll see output like:
+
+```
+LABEL_STUDIO_URL: https://myenv-abc123-ca.kindgrass-12345678.eastus.azurecontainerapps.io
+```
+
+Visit that URL to start using Label Studio!
+
+## Common Commands
+
+### View Logs
 ```bash
 azd monitor --logs
 ```
 
-Or visit the Azure Portal to view:
-- Application Insights for application metrics and traces
-- Log Analytics for container logs
-- Container App metrics for resource usage
+### Redeploy After Code Changes
+```bash
+azd deploy
+```
 
-## Clean Up
+### Update Infrastructure Only
+```bash
+azd provision
+```
 
-To delete all Azure resources:
+### View Environment Variables
+```bash
+azd env get-values
+```
 
+### Delete Everything
 ```bash
 azd down
 ```
 
-## Costs
+## What Gets Created?
 
-Pricing varies per region and usage. The resources used in this infrastructure:
+Running `azd up` creates these resources in Azure:
 
-- **Azure Container Apps**: Consumption tier with 1 CPU, 2GiB memory. [Pricing](https://azure.microsoft.com/pricing/details/container-apps/)
-- **Azure Container Registry**: Basic tier. [Pricing](https://azure.microsoft.com/pricing/details/container-registry/)
-- **Azure Storage Account**: Standard LRS with File Share (1TB quota). [Pricing](https://azure.microsoft.com/pricing/details/storage/files/)
-- **Log Analytics**: Pay-as-you-go tier. [Pricing](https://azure.microsoft.com/pricing/details/monitor/)
+1. **Resource Group** - Container for all resources
+2. **Container Apps Environment** - Runtime environment for containers
+3. **Storage Account** - Persistent storage with file share
+4. **Container Registry** - Stores your Docker images
+5. **Container App** - Runs Label Studio
+6. **Log Analytics** - Centralized logging
+7. **Application Insights** - Application monitoring
 
-💡 Try the [Azure pricing calculator](https://azure.microsoft.com/pricing/calculator/) to estimate costs.
+## Default Configuration
 
-⚠️ To avoid unnecessary costs, remember to run `azd down` when you're done using the application.
+- **Label Studio Version**: Latest from Docker Hub
+- **Port**: 8080
+- **CPU**: 1.0 cores
+- **Memory**: 2.0 GiB
+- **Replicas**: 1 (fixed, no auto-scaling by default)
+- **Data Mount**: Azure File Share at `/label-studio/data`
+- **Storage**: 1TB file share quota
 
-## Troubleshooting
+## Customization
 
-### View deployment logs
+### Change Label Studio Version
 
+Edit `Dockerfile.azd`:
+```dockerfile
+FROM heartexlabs/label-studio:1.9.0
+```
+
+Deploy:
+```bash
+azd deploy
+```
+
+### Add Environment Variables
+
+Edit `infra/labelstudio.bicep`, add to the `app` module:
+```bicep
+env: [
+  {
+    name: 'MY_ENV_VAR'
+    value: 'my_value'
+  }
+]
+```
+
+Deploy:
+```bash
+azd provision  # Update infrastructure
+```
+
+### Adjust CPU/Memory
+
+Edit `infra/labelstudio.bicep`:
+```bicep
+containerCpuCoreCount: '2.0'
+containerMemory: '4.0Gi'
+```
+
+Deploy:
+```bash
+azd provision
+```
+
+## Monitoring
+
+### View Real-time Logs
 ```bash
 azd monitor --logs
 ```
 
-### Check container app status
+### View in Azure Portal
+1. Go to [portal.azure.com](https://portal.azure.com)
+2. Find your resource group (named `<env-name>-rg`)
+3. Open the Container App
+4. Navigate to "Log stream" or "Metrics"
 
-```bash
-az containerapp show --name <app-name> --resource-group <resource-group> --query properties.runningStatus
-```
+## Cost Management
 
-### Access container logs directly
+### Estimate Costs
 
-```bash
-az containerapp logs show --name <app-name> --resource-group <resource-group> --follow
-```
+Main cost drivers:
+- Container Apps: ~$50-100/month (1 vCPU, 2GB RAM, always on)
+- Container Registry: ~$5/month (Basic tier)
+- Storage: ~$20/month (1TB file share, low usage)
+- Log Analytics: ~$5-10/month (low data ingestion)
 
-### Common Issues
+**Total estimated**: ~$80-135/month
 
-**Deployment fails with "location not available"**: Try a different Azure region during `azd up`.
+### Reduce Costs
 
-**Container app won't start**: Check the logs with `azd monitor --logs` to see container startup errors.
+1. **Use smaller container:**
+   ```bicep
+   containerCpuCoreCount: '0.5'
+   containerMemory: '1.0Gi'
+   ```
 
-**Data not persisting**: Verify the storage mount is configured correctly in the Azure Portal under the Container App's "Volumes" section.
+2. **Scale to zero when not in use:**
+   ```bicep
+   containerMinReplicas: 0
+   containerMaxReplicas: 1
+   ```
 
-## Migrating from bootstrap.sh
+3. **Delete when not needed:**
+   ```bash
+   azd down
+   ```
 
-If you were previously using the `bootstrap.sh` script, this azd project provides the same functionality with these improvements:
+## CI/CD Integration
 
-- ✅ Infrastructure as Code (Bicep) instead of imperative CLI commands
-- ✅ Automatic environment management and configuration
-- ✅ Easy redeployment and updates with `azd deploy`
-- ✅ Integrated monitoring and logging
-- ✅ Simplified cleanup with `azd down`
-- ✅ Container Registry for custom image management
+### GitHub Actions
 
-The deployment creates the same resources:
-- Resource Group
-- Container Apps Environment  
-- Storage Account with File Share mounted at `/label-studio/data`
-- Container App running Label Studio
-- Container Registry (for building and hosting the image)
-- Log Analytics and Application Insights
-
-**To migrate existing data**: Copy files from your old storage account file share to the new one after deployment using Azure Storage Explorer or `az storage` commands.
-
-## Additional Resources
-
-- [Label Studio Documentation](https://labelstud.io/guide/)
-- [Azure Container Apps Documentation](https://learn.microsoft.com/azure/container-apps/)
-- [Azure Developer CLI Documentation](https://learn.microsoft.com/azure/developer/azure-developer-cli/)
-- [Azure Files Documentation](https://learn.microsoft.com/azure/storage/files/)
+Check out [.github/workflows/azure-dev.yml](.github/workflows/azure-dev.yml) for an example GitHub Actions workflow that deploys on push to `main`.
 
 ## Getting Help
 
-If you run into issues:
-1. Check the [Label Studio GitHub Issues](https://github.com/heartexlabs/label-studio/issues)
-2. Review [Azure Container Apps troubleshooting](https://learn.microsoft.com/azure/container-apps/troubleshooting)
-3. Post in the project **Discussions**
+- [Label Studio Docs](https://labelstud.io/guide/)
+- [Azure Container Apps Docs](https://learn.microsoft.com/azure/container-apps/)
+- [Azure Developer CLI Docs](https://learn.microsoft.com/azure/developer/azure-developer-cli/)
+
