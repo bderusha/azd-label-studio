@@ -1,0 +1,57 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "location": {
+        "value": "${AZURE_LOCATION}"
+      },
+      "name": {
+        "value": "${SERVICE_APP_NAME}"
+      },
+      "imageName": {
+        "value": "${SERVICE_APP_IMAGE_NAME}"
+      },
+      "appExists": {
+        "value": "${SERVICE_APP_RESOURCE_EXISTS=false}"
+      },
+      "containerAppsEnvironmentName": {
+        "value": "${AZURE_CONTAINER_ENVIRONMENT_NAME}"
+      },
+      "identityName": {
+        "value": "${SERVICE_APP_IDENTITY_NAME}"
+      },
+      "storageAccountName": {
+        "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
+      },
+      "storageContainerName": {
+        "value": "${AZURE_STORAGE_CONTAINER_NAME}"
+      },
+      "command": {
+        "value": [
+          "label-studio"
+        ]
+      },
+      "args": {
+        "value": [
+          "--log-level",
+          "DEBUG"
+        ]
+      },
+      "env": {
+        "value": [
+          {
+            "name": "LABEL_STUDIO_USERNAME",
+            "value": "admin@localhost"
+          },
+          {
+            "name": "LABEL_STUDIO_PASSWORD",
+            "value": "password"
+          },
+          {
+            "name": "LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK",
+            "value": "true"
+          }
+        ]
+      }
+    }
+}

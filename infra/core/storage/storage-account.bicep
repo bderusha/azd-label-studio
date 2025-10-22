@@ -3,7 +3,7 @@ param location string = resourceGroup().location
 param tags object = {}
 
 @description('Name of the blob container to create')
-param containerName string = 'labelstudiodata'
+param containerName string = 'data'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: name

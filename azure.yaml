@@ -4,6 +4,13 @@ name: label-studio-app
 metadata:
   template: label-studio-app@0.0.1
 services:
-  label-studio:
+  app:
     host: containerapp
     image: heartexlabs/label-studio:latest
+    env:
+    - name: LABEL_STUDIO_USERNAME
+      value: admin@localhost
+    - name: LABEL_STUDIO_PASSWORD
+      value: password
+    - name: LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK
+      value: "true"
