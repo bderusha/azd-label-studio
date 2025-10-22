@@ -59,11 +59,6 @@ Visit that URL to start using Label Studio!
 azd monitor --logs
 ```
 
-### Redeploy After Code Changes
-```bash
-azd deploy
-```
-
 ### Update Infrastructure Only
 ```bash
 azd provision
@@ -88,19 +83,21 @@ Running `azd up` creates these resources in Azure:
 3. **Storage Account** - Blob storage for Label Studio data persistence
 4. **Container App** - Runs Label Studio (image pulled from Docker Hub)
 5. **Log Analytics** - Centralized logging
-6. **Managed Identity** - Secure access to blob storage
+6. **Application Insights** - Monitoring and telemetry
+7. **Managed Identity** - Secure access to blob storage
 
 ## Default Configuration
 
-- **Label Studio Version**: Latest from Docker Hub
+- **Docker Image**: `heartexlabs/label-studio:latest`
 - **Port**: 8080
 - **CPU**: 1.0 cores
 - **Memory**: 2.0 GiB
 - **Replicas**: 1 (fixed, no auto-scaling by default)
 - **Storage**: Azure Blob Storage container (`data`)
-- **Default Admin Username**: `admin@localhost`
-- **Default Admin Password**: `password`
-- **Signup Settings**: Signup without link disabled by default
+- **Label Studio Specific Settings**:
+  - **Default Admin Username**: `admin@localhost`
+  - **Default Admin Password**: `password`
+  - **Signup Settings**: Signup without link disabled by default
 
 ## Customization
 
@@ -123,47 +120,38 @@ azd deploy
 
 ### Configure Label Studio Settings
 
-Set environment variables to customize authentication and signup:
+Customize Label Studio settings in `app.parameters.json`
 
-```bash
-azd env set LABEL_STUDIO_USERNAME "your-admin@example.com"
-azd env set LABEL_STUDIO_PASSWORD "your-secure-password"
-azd env set LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK "false"
-```
+`command` and `args` are the command-line options run against the container. `env` is for the environment variables set in the container.
 
-Deploy:
-```bash
-azd up
-```
-
-### Add New Environment Variables
-
-Edit `infra/labelstudio.bicep`, add to the `app` module:
-```bicep
-env: [
-  {
-    name: 'MY_ENV_VAR'
-    value: 'my_value'
-  }
-]
-```
-
-Deploy:
-```bash
-azd provision  # Update infrastructure
+```json
+"command": {
+   "value": [
+      "label-studio"
+   ]
+},
+"args": {
+   "value": [
+      "--log-level",
+      "DEBUG"
+   ]
+},
+"env": {
+   "value": [
+      {
+      "name": "LABEL_STUDIO_USERNAME",
+      "value": "admin@localhost"
+      }
+   ]
+}
 ```
 
 ### Adjust CPU/Memory
 
-Edit `infra/labelstudio.bicep`:
+Edit `infra/app.bicep`:
 ```bicep
 containerCpuCoreCount: '2.0'
 containerMemory: '4.0Gi'
-```
-
-Deploy:
-```bash
-azd provision
 ```
 
 ## Monitoring
