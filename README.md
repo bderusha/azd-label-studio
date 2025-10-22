@@ -1,14 +1,14 @@
-# Label Studio on Azure Container Apps
+# Public Image Deployment on Azure Container Apps (with Label Studio)
 
-This project deploys [Label Studio](https://labelstud.io/) to Azure Container Apps using the Azure Developer CLI (azd).
+This project deploys an instance of [Label Studio](https://labelstud.io/) to Azure Container Apps using the Azure Developer CLI (azd), but this template can be adapted for any public docker image.
 
 ## Features
 
 The repository is designed for use with [Docker containers](https://www.docker.com/) and includes infrastructure files for deployment to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview). 🐳
 
-- **Label Studio**: Latest version deployed from official Docker Hub image
-- **Persistent Storage**: Azure Blob Storage
+- **Public Image**: This template deploys the latest version of Label Studio from the official Docker Hub image
 - **Container Apps**: Serverless container hosting with automatic scaling
+- **Persistent Storage**: Azure Blob Storage accessed with Managed Identity
 - **Monitoring**: Application Insights and Log Analytics integration
 
 ## Prerequisites
@@ -37,7 +37,7 @@ azd up
 ```
 
 You'll be prompted for:
-- **Environment name**: A name for this deployment (e.g., `labelstudio-prod`)
+- **Environment name**: A name for this deployment (e.g., `labelstudio`)
 - **Subscription**: Select your Azure subscription
 - **Location**: Choose a region (e.g., `eastus`, `westus2`)
 
@@ -46,7 +46,8 @@ You'll be prompted for:
 After deployment completes (5-10 minutes), you'll see output like:
 
 ```
-LABEL_STUDIO_URL: https://myenv-abc123-ca.kindgrass-12345678.eastus.azurecontainerapps.io
+(✓) Done: Deploying service app
+  - Endpoint: https://myenv-abc123-ca.kindgrass-12345678.eastus.azurecontainerapps.io
 ```
 
 Visit that URL to start using Label Studio!
@@ -96,7 +97,7 @@ Running `azd up` creates these resources in Azure:
 - **CPU**: 1.0 cores
 - **Memory**: 2.0 GiB
 - **Replicas**: 1 (fixed, no auto-scaling by default)
-- **Storage**: Azure Blob Storage container (`labelstudiodata`)
+- **Storage**: Azure Blob Storage container (`data`)
 - **Default Admin Username**: `admin@localhost`
 - **Default Admin Password**: `password`
 - **Signup Settings**: Signup without link disabled by default

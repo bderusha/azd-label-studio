@@ -14,6 +14,8 @@ param containerMaxReplicas int = 10
 
 param secrets array = []
 param env array = []
+param command array = []
+param args array = []
 param external bool = true
 param targetPort int = 80
 param exists bool
@@ -70,6 +72,8 @@ module app 'container-app.bicep' = {
     secrets: secrets
     external: external
     env: env
+    command: command
+    args: args
     imageName: !empty(imageName) ? imageName : (exists ? existingApp.properties.template.containers[0].image : '')
     targetPort: targetPort
     volumeMounts: volumeMounts

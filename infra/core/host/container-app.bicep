@@ -14,6 +14,8 @@ param containerMaxReplicas int = 10
 
 param secrets array = []
 param env array = []
+param command array = []
+param args array = []
 param external bool = true
 param imageName string
 param targetPort int = 80
@@ -78,13 +80,8 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         {
           image: !empty(imageName) ? imageName : 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          command: [
-            'label-studio'
-          ]
-          args: [
-            '--log-level'
-            'DEBUG'
-          ]
+          command: command
+          args: args
           name: containerName
           env: env
           resources: {
