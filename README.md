@@ -84,11 +84,10 @@ Running `azd up` creates these resources in Azure:
 
 1. **Resource Group** - Container for all resources
 2. **Container Apps Environment** - Runtime environment for containers
-3. **Storage Account** - Persistent storage with file share
-4. **Container Registry** - Stores your Docker images
-5. **Container App** - Runs Label Studio
-6. **Log Analytics** - Centralized logging
-7. **Application Insights** - Application monitoring
+3. **Storage Account** - Blob storage for Label Studio data persistence
+4. **Container App** - Runs Label Studio (image pulled from Docker Hub)
+5. **Log Analytics** - Centralized logging
+6. **Managed Identity** - Secure access to blob storage
 
 ## Default Configuration
 
@@ -97,24 +96,46 @@ Running `azd up` creates these resources in Azure:
 - **CPU**: 1.0 cores
 - **Memory**: 2.0 GiB
 - **Replicas**: 1 (fixed, no auto-scaling by default)
-- **Data Mount**: Azure File Share at `/label-studio/data`
-- **Storage**: 1TB file share quota
+- **Storage**: Azure Blob Storage container (`labelstudiodata`)
+- **Default Admin Username**: `admin@localhost`
+- **Default Admin Password**: `password`
+- **Signup Settings**: Signup without link disabled by default
 
 ## Customization
 
 ### Change Label Studio Version
 
-Edit `Dockerfile.azd`:
-```dockerfile
-FROM heartexlabs/label-studio:1.9.0
+Edit `azure.yaml` to specify a different image version:
+
+```yaml
+services:
+  label-studio:
+    host: containerapp
+    image: heartexlabs/label-studio:1.9.0
 ```
 
 Deploy:
+
 ```bash
 azd deploy
 ```
 
-### Add Environment Variables
+### Configure Label Studio Settings
+
+Set environment variables to customize authentication and signup:
+
+```bash
+azd env set LABEL_STUDIO_USERNAME "your-admin@example.com"
+azd env set LABEL_STUDIO_PASSWORD "your-secure-password"
+azd env set LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK "false"
+```
+
+Deploy:
+```bash
+azd up
+```
+
+### Add New Environment Variables
 
 Edit `infra/labelstudio.bicep`, add to the `app` module:
 ```bicep
@@ -163,11 +184,10 @@ azd monitor --logs
 
 Main cost drivers:
 - Container Apps: ~$50-100/month (1 vCPU, 2GB RAM, always on)
-- Container Registry: ~$5/month (Basic tier)
-- Storage: ~$20/month (1TB file share, low usage)
+- Storage: ~$5-20/month (blob storage, usage dependent)
 - Log Analytics: ~$5-10/month (low data ingestion)
 
-**Total estimated**: ~$80-135/month
+**Total estimated**: ~$60-130/month
 
 ### Reduce Costs
 

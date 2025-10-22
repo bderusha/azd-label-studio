@@ -10,6 +10,15 @@
     },
     "apiAppExists": {
       "value": "${SERVICE_LABEL_STUDIO_RESOURCE_EXISTS=false}"
+    },
+    "labelStudioUsername": {
+      "value": "${LABEL_STUDIO_USERNAME=admin@localhost}"
+    },
+    "labelStudioPassword": {
+      "value": "${LABEL_STUDIO_PASSWORD=password}"
+    },
+    "labelStudioDisableSignupWithoutLink": {
+      "value": "${LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK=true}"
     }
   }
 }

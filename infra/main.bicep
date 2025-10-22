@@ -10,6 +10,9 @@ param name string
 param location string
 
 param apiAppExists bool = false
+param labelStudioUsername string = 'admin@localhost'
+param labelStudioPassword string = 'password'
+param labelStudioDisableSignupWithoutLink string = 'true'
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
@@ -66,6 +69,9 @@ module labelstudio 'labelstudio.bicep' = {
     exists: apiAppExists
     storageAccountName: storage.outputs.name
     storageContainerName: storage.outputs.containerName
+    labelStudioUsername: labelStudioUsername
+    labelStudioPassword: labelStudioPassword
+    labelStudioDisableSignupWithoutLink: labelStudioDisableSignupWithoutLink
   }
 }
 

@@ -9,6 +9,9 @@ param exists bool
 param labelStudioImage string = 'heartexlabs/label-studio:latest'
 param storageAccountName string = ''
 param storageContainerName string = ''
+param labelStudioDisableSignupWithoutLink string = 'true'
+param labelStudioUsername string = 'admin@localhost'
+param labelStudioPassword string = 'password'
 
 resource apiIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -32,15 +35,15 @@ module app 'core/host/container-app-upsert.bicep' = {
     env: [
       {
         name: 'LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK'
-        value: 'false'
+        value: labelStudioDisableSignupWithoutLink
       }
       {
         name: 'LABEL_STUDIO_USERNAME'
-        value: 'admin@localhost'
+        value: labelStudioUsername
       }
       {
         name: 'LABEL_STUDIO_PASSWORD'
-        value: 'admin@localhost'
+        value: labelStudioPassword
       }
       {
         name: 'AZURE_STORAGE_ACCOUNT_NAME'
