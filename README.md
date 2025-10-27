@@ -31,7 +31,12 @@ The repository is designed for use with [Docker containers](https://www.docker.c
 azd auth login
 ```
 
-### 2. Deploy Everything
+### 2. Initialize the Project
+```bash
+azd init -t bderusha/azd-label-studio
+```
+
+### 3. Deploy Everything
 ```bash
 azd up
 ```
